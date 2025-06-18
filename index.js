@@ -9,7 +9,7 @@ http.createServer((req,res)=>{
     let Query = URL.query;
     
     if(URL.pathname==='/products' && req.method=='GET' && Query.id==undefined){
-       res.end(products)
+       res.end(JSON.stringify(products))
     }else if (URL.pathname==='/products' && req.method=='GET' && Query.id!=undefined){
         let product = products.find((product)=>{
             return product.id == URL.query.id;
@@ -19,7 +19,7 @@ http.createServer((req,res)=>{
         }else{
             res.end(JSON.stringify({"message":"Product ID is invalid"}))
         }
-     }else if (req.method=="POSt" && URL.pathname==="/products"){
+     }else if (req.method=="POST" && URL.pathname==="/products"){
         let product = "";
         req.on('data',(chunk)=>{
             product = product+chunk;
@@ -28,8 +28,8 @@ http.createServer((req,res)=>{
             let newProduct=JSON.parse(product);
             products.push(newProduct);
             fs.writeFile('./products.json',JSON.stringify(products),(err)=>{
-                if(err!==null){
-                    res.end(err);
+                if(err!=null){
+                    res.end(JSON.stringify({error:err.message}));
                 }else{
                     res.end(JSON.stringify({"message":"Product added successfully"}));
                 }
@@ -41,14 +41,19 @@ http.createServer((req,res)=>{
             return product.id==Query.id;
         })
         
-        product.slice(productIndex,1); //product index eken patan aran ekak delete karanawa
-        fs.writeFile('./products',JSON.stringify(products),(err)=>{
-            if(err!==null){
-                res.end(err);
-            }else{
-                res.end(JSON.stringify({"message":"Product deleted successfully"}));
-            }
-        })
+        if(productIndex!=-1){
+            products.splice(productIndex,1); //product index eken patan aran ekak delete karanawa
+            fs.writeFile('./products',JSON.stringify(products),(err)=>{
+                if(err!==null){
+                    res.end(err.message);
+                }else{
+                    res.end(JSON.stringify({"message":"Product deleted successfully"}));
+                }
+            })
+        }else{
+            res.end(JSON.stringify({"message":"Product ID is invalid"}));
+        }
+        
      }else if(req.method=='PUT',URL.pathname==='/products'){
         let index=products.findIndex((product)=>{
             return product.id==Query.id;
@@ -65,7 +70,7 @@ http.createServer((req,res)=>{
                 products[index]=newProduct;
                 fs.writeFile('./products.json',JSON.stringify(products),(err)=>{
                     if(err!=null){
-                        res.end(err);
+                        res.end(err.message);
                     }else{
                         res.end(JSON.stringify({"message":"Product updated successfully"}));
                     }
