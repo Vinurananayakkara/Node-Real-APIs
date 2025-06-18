@@ -35,6 +35,46 @@ http.createServer((req,res)=>{
                 }
             });
         })
+     }else if(req.method=='DELETE' && URL.pathname==='/products'){
+        //find eken gnne object ek ... slice ekt ona index eka
+        let productIndex = products.findIndex((product)=>{
+            return product.id==Query.id;
+        })
+        
+        product.slice(productIndex,1); //product index eken patan aran ekak delete karanawa
+        fs.writeFile('./products',JSON.stringify(products),(err)=>{
+            if(err!==null){
+                res.end(err);
+            }else{
+                res.end(JSON.stringify({"message":"Product deleted successfully"}));
+            }
+        })
+     }else if(req.method=='PUT',URL.pathname==='/products'){
+        let index=products.findIndex((product)=>{
+            return product.id==Query.id;
+        })
+        if(index!=-1){
+            let product = "";
+            req.on('data',(chunck)=>{
+                product+= chunck;
+
+
+            })
+            req.on('end',()=>{
+                let newProduct=JSON.parse(product);
+                products[index]=newProduct;
+                fs.writeFile('./products.json',JSON.stringify(products),(err)=>{
+                    if(err!=null){
+                        res.end(err);
+                    }else{
+                        res.end(JSON.stringify({"message":"Product updated successfully"}));
+                    }
+                })
+            })
+        }
+
+
+
      }
     
 
