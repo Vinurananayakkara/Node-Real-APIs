@@ -7,6 +7,15 @@ http.createServer((req,res)=>{
     let URL=url.parse(req.url,true);
     let products = JSON.parse(fs.readFileSync('./products.json','utf-8'))
     let Query = URL.query;
+
+    res.setHeader("Access-Control-Allow-Origin","*");
+    res.setHeader("Access-Control-Allow-Headers","*");
+    res.setHeader("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,OPTIONS");
+    
+    //Handling options preflight request
+    if(req.method=='OPTIONS'){
+        res.end();
+    }
     
     if(URL.pathname==='/products' && req.method=='GET' && Query.id==undefined){
        res.end(JSON.stringify(products))
